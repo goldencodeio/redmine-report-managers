@@ -29,8 +29,8 @@ function APIRequest(reqUrl, options) {
   return result;
 }
 
-function APIRequestIssueById(issueId, options) {
-  var url = 'http://redmine.zolotoykod.ru/issues/' + issueId + '.json?key=' + OPTIONS.apiKey;
+function APIRequestById(reqUrl, id, options) {
+  var url = 'http://redmine.zolotoykod.ru/' + reqUrl + '/' + id + '.json?key=' + OPTIONS.apiKey;
   if (!options) options = {};
   if (options.query)
     options.query.forEach(function(item) {
