@@ -6,7 +6,6 @@ function initOptions() {
   getOptionsData();
 
   OPTIONS.currentDate = OPTIONS.startDate;
-  Logger.log(OPTIONS.currentDate.toJSON());
   var sheetName = formatDate(OPTIONS.currentDate);
   var existingSheet = _ss.getSheetByName(sheetName);
   var tDate = new Date(OPTIONS.currentDate.getTime());
@@ -15,7 +14,7 @@ function initOptions() {
     initTable();
     processReports();
   } else {
-    tDate.setDate(tDate.getDate() -1);
+    tDate.setDate(tDate.getDate() - 1);
     var prevSheet = _ss.getSheetByName(formatDate(tDate));
     var isRangesEmpty = false;
     if (prevSheet) {
@@ -48,8 +47,8 @@ function getOptionsData() {
     OPTIONS[key] = row.length > 1 ? row : row[0];
   });
 
-  OPTIONS.startDate.setHours(OPTIONS.startDate.getHours() - 1 * OPTIONS.startDate.getTimezoneOffset() / 60);
-  OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() - 1 * OPTIONS.finalDate.getTimezoneOffset() / 60);
+  OPTIONS.startDate.setHours(OPTIONS.startDate.getHours() + 4);
+  OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() + 4);
 
   if (!Array.isArray(OPTIONS.performers)) OPTIONS.performers = [OPTIONS.performers];
   if (!Array.isArray(OPTIONS.performersWorkHours)) OPTIONS.performersWorkHours = [OPTIONS.performersWorkHours];

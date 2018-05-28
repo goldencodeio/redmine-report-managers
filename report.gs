@@ -162,6 +162,8 @@ function getProjectsProcessed(user) {
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
 
+  if (!res.time_entries.length) return 0;
+
   var projectsId = res.time_entries.map(function(item) {
     return item.project.id;
   });
@@ -174,13 +176,6 @@ function getProjectsProcessed(user) {
     var resProject = APIRequestById('projects', id);
     return resProject.project;
   });
-
-  // projectsId.sort(function(a, b) {return a - b;});
-  // var filtredProjectsId = [];
-  // for (var i = 0; i < projectsId.length; i++) {
-  //    if(projectsId[i] == filtredProjectsId[filtredProjectsId.length - 1]) continue;
-  //    filtredProjectsId.push(projectsId[i]);
-  // }
 }
 
 function getProjectsProcessedDev(user) {
@@ -188,6 +183,8 @@ function getProjectsProcessedDev(user) {
     {key: 'user_id', value: user.id},
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
+
+  if (!res.time_entries.length) return 0;
 
   var issuesId = res.time_entries.map(function(item) {
     return item.issue.id;
@@ -225,6 +222,8 @@ function getProjectsProcessedIntegrat(user) {
     {key: 'user_id', value: user.id},
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
+
+  if (!res.time_entries.length) return 0;
 
   var issuesId = res.time_entries.map(function(item) {
     return item.issue.id;
