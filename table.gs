@@ -26,7 +26,7 @@ function writeUserRows() {
   });
 
   rowI+=2;
-  sheet.getRange(rowI, 1, 1, sheet.getLastColumn()).setBackground('#ea9999');
+  sheet.getRange(rowI, 1, 1, sheet.getLastColumn()).setBackground('#cfe2f3');
   sheet.getRange(rowI, 1).setValue('Итого').setFontWeight('bold');
   sheet.getRange(rowI, 2).setValue(formatDate(OPTIONS.startDate));
   sheet.getRange(rowI+=2, 7).setValue('Ответственный').setFontWeight('bold');

@@ -62,16 +62,22 @@ function processReports() {
   var rowI = 2;
   var columnI = 2;
   var doneIssues = [];
+  var totalReports = [];
   OPTIONS.performers = OPTIONS.performers.map(function(user, userIndex) {
     user.reports = {};
 
-    REPORT.forEach(function(report) {
+    REPORT.forEach(function(report, reportIndex) {
       if (!report.manual) {
         var reportValue = getUserReport(report.code, user, userIndex);
         user.reports[report] = reportValue;
         if ((Array.isArray(reportValue))) {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = [];
           var listUrl = '';
           if ((Array.isArray(reportValue[0]))) {
+            if (totalReports[reportIndex][0] === undefined) totalReports[reportIndex][0] = [];
+            if (totalReports[reportIndex][1] === undefined) totalReports[reportIndex][1] = [];
+            totalReports[reportIndex][0] = totalReports[reportIndex][0].concat(reportValue[0]);
+            totalReports[reportIndex][1] = totalReports[reportIndex][1].concat(reportValue[1]);
             reportValue[0].forEach(function(item) {
               if (report.code.search(/projects_/) === 0)
                 listUrl += 'http://redmine.zolotoykod.ru/projects/' + item.identifier + '\n';
@@ -80,6 +86,7 @@ function processReports() {
             });
             sheet.getRange(rowI, columnI++).setValue(reportValue[0].length + ' / '+ reportValue[1].length).setNote(listUrl);
           } else {
+            totalReports[reportIndex] = totalReports[reportIndex].concat(reportValue);
             reportValue.forEach(function(item) {
               if (report.code.search(/projects_/) === 0)
                 listUrl += 'http://redmine.zolotoykod.ru/projects/' + item.identifier + '\n';
@@ -89,6 +96,8 @@ function processReports() {
             sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
           }
         } else {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = 0;
+          totalReports[reportIndex] += reportValue;
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
@@ -99,6 +108,35 @@ function processReports() {
     columnI = 2;
     rowI++;
     return user;
+  });
+
+  rowI += 2;
+
+  totalReports.forEach(function(value, i) {
+    if (i === 0) return ++columnI;
+
+    if ((Array.isArray(value))) {
+      var listUrl = '';
+      if ((Array.isArray(value[0]))) {
+        value[0].forEach(function(item) {
+          if (item.identifier)
+            listUrl += 'http://redmine.zolotoykod.ru/projects/' + item.identifier + '\n';
+          else
+            listUrl += 'http://redmine.zolotoykod.ru/issues/' + item.id + '\n';
+        });
+        sheet.getRange(rowI, columnI++).setValue(value[0].length + ' / '+ value[1].length).setNote(listUrl);
+      } else {
+        value.forEach(function(item) {
+          if (item.identifier)
+            listUrl += 'http://redmine.zolotoykod.ru/projects/' + item.identifier + '\n';
+          else
+            listUrl += 'http://redmine.zolotoykod.ru/issues/' + item.id + '\n';
+        });
+        sheet.getRange(rowI, columnI++).setValue(value.length).setNote(listUrl);
+      }
+    } else {
+      sheet.getRange(rowI, columnI++).setValue(Math.floor(value / OPTIONS.performers.length));
+    }
   });
 }
 
@@ -162,7 +200,7 @@ function getProjectsProcessed(user) {
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
 
-  if (!res.time_entries.length) return 0;
+  if (!res.time_entries.length) return [];
 
   var projectsId = res.time_entries.map(function(item) {
     return item.project.id;
@@ -184,7 +222,7 @@ function getProjectsProcessedDev(user) {
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
 
-  if (!res.time_entries.length) return 0;
+  if (!res.time_entries.length) return [];
 
   var issuesId = res.time_entries.map(function(item) {
     return item.issue.id;
@@ -223,7 +261,7 @@ function getProjectsProcessedIntegrat(user) {
     {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
   ]});
 
-  if (!res.time_entries.length) return 0;
+  if (!res.time_entries.length) return [];
 
   var issuesId = res.time_entries.map(function(item) {
     return item.issue.id;
@@ -293,16 +331,6 @@ function getDoneTasks(user) {
 }
 
 function getPaidSeparatelyTasks(user) {
-  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  // var res = APIRequest('issues', {query: [
-  //   {key: 'assigned_to_id', value: user.id},
-  //   {key: 'status_id', value: 'closed'},
-  //   {key: 'closed_on', value: date},
-  //   {key: 'cf_24', value: 'Единовременная услуга (К оплате)'}
-  // ]});
-  //
-  // return res.issues;
-
   var paidSeparatelyTasks = doneIssues.filter(function(item) {
     var tariff = item.custom_fields.find(function(i) {return i.id === 24});
     if (tariff && tariff.value === 'Единовременная услуга (К оплате)') return true;
@@ -317,19 +345,22 @@ function getPaidSeparatelyTasks(user) {
 }
 
 function getClaims(user) {
-  var allClaims = APIRequest('issues', {query: [
+  var res = APIRequest('issues', {query: [
     {key: 'tracker_id', value: 5},
-    {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
     {key: 'created_on', value: formatDate(OPTIONS.currentDate)}
   ]});
 
-  var closedClaims = APIRequest('issues', {query: [
-    {key: 'tracker_id', value: 5},
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'created_on', value: formatDate(OPTIONS.currentDate)}
-  ]});
+  var allClaims = res.issues.filter(function(item) {
+    var responsibles = item.custom_fields.find(function(i) {return i.id === 40}).value;
+    for (var i = 0; i < responsibles.length; i++) {
+      if (parseInt(responsibles[i], 10) === user.id) return true;
+    }
+  });
 
-  return [allClaims.issues, closedClaims.issues];
+  var closedClaims = allClaims.filter(function(item) {
+    return item.status.id === 5;
+  });
+
+  return [allClaims, closedClaims];
 }
