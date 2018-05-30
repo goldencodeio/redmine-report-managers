@@ -28,11 +28,12 @@ function writeUserRows() {
   rowI+=2;
   sheet.getRange(rowI, 1, 1, sheet.getLastColumn()).setBackground('#cfe2f3');
   sheet.getRange(rowI, 1).setValue('Итого').setFontWeight('bold');
-  sheet.getRange(rowI, 2).setValue(formatDate(OPTIONS.startDate));
-  sheet.getRange(rowI+=2, 7).setValue('Ответственный').setFontWeight('bold');
-  sheet.getRange(rowI, 8).setValue('Утверждает').setFontWeight('bold');
-  sheet.getRange(rowI++, 9).setValue('Оценка').setFontWeight('bold');
-  sheet.getRange(rowI, 7).setValue(OPTIONS.daily[0]);
-  sheet.getRange(rowI, 8).setValue(OPTIONS.daily[1]);
-  ss.setNamedRange('manualRange' + rowI + 9, sheet.getRange(sheet.getRange(rowI, 9).getA1Notation()));
+  sheet.getRange(rowI++, 2).setValue(formatDate(OPTIONS.startDate));
+  sheet.getRange(rowI++, 1).setValue('Ответственный').setBackground('#cfe2f3').setFontWeight('bold');
+  sheet.getRange(rowI++, 1).setValue(OPTIONS.daily[0]).setBackground('#cfe2f3');
+  sheet.getRange(rowI++, 1).setValue('Утверждает').setBackground('#cfe2f3').setFontWeight('bold');
+  sheet.getRange(rowI++, 1).setValue(OPTIONS.daily[1]).setBackground('#cfe2f3');
+  sheet.getRange(rowI++, 1).setValue('Оценка').setBackground('#cfe2f3').setFontWeight('bold');
+  sheet.getRange(rowI, 1).setBackground('#cfe2f3');
+  ss.setNamedRange('manualRange' + rowI + 1, sheet.getRange(sheet.getRange(rowI, 1).getA1Notation()));
 }
