@@ -146,6 +146,12 @@ function processReports() {
       sheet.getRange(rowI, columnI++).setValue(Math.floor(value / OPTIONS.performers.length));
     }
   });
+
+  var colTotalDelays = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
+  sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalDelays + '2:' + colTotalDelays + (rowI - 1) + ')');
+
+  var colTotalOverTime = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
+  sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalOverTime + '2:' + colTotalOverTime + (rowI - 1) + ')');
 }
 
 function getUserReport(report, user, userIndex) {
