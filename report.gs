@@ -328,21 +328,23 @@ function getDoneTasks(user) {
   doneIssues = filteredIssues;
 
   var filteredIssuesWithRate = filteredIssues.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
   return [filteredIssues, filteredIssuesWithRate];
 }
 
 function getPaidSeparatelyTasks(user) {
   var paidSeparatelyTasks = doneIssues.filter(function(item) {
-    var tariff = item.custom_fields.find(function(i) {return i.id === 24});
+    var tariff = item.custom_fields.find(function(i) {
+      return i.id === 24 || i.id === 25 || i.id === 26;
+    });
     if (tariff && tariff.value === 'Единовременная услуга (К оплате)') return true;
   });
 
   var paidSeparatelyTasksWithRate = paidSeparatelyTasks.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   return [paidSeparatelyTasks, paidSeparatelyTasksWithRate];
